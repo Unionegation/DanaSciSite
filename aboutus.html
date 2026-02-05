@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | DHHS SCI</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Archive&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --light: #eeeeee;
+      --teal: #004765;
+      --navy-1: #021826; /* deep navy */
+      --navy-2: #003247; /* mid navy */
+      --black: #000000;
+      --white: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Libre Baskerville', serif;
+      color: var(--black);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background: var(--light);
+    }
+
+    h1, h2, h3, nav a {
+      font-family: 'Archive', sans-serif;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    header {
+      color: var(--white);
+      padding: 4rem 1.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, var(--navy-1) 0%, var(--navy-2) 50%, var(--teal) 100%);
+      box-shadow: 0 20px 40px rgba(0,0,0,.25);
+      position: relative;
+    }
+
+    .text-logo { max-width: 420px; height: auto; display: block; margin: 0 auto 0.7rem; }
+    header p { opacity: 0.9; font-size: 1.1rem; }
+
+    section {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 2.2rem;
+      border-radius: 20px;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 15px 35px rgba(0,0,0,.12);
+      transform: translateY(10px);
+      opacity: 0;
+      animation: floatUp .6s ease forwards;
+      transition: transform 0.3s ease;
+    }
+
+    section:hover { transform: translateY(-5px) translateZ(5px); }
+
+    section:nth-of-type(1) { animation-delay: 0s; }
+    section:nth-of-type(2) { animation-delay: .1s; }
+
+    @keyframes floatUp { to { transform: translateY(0); opacity: 1; } }
+
+    section h2 { color: var(--teal); margin-bottom: 1.2rem; font-size: 1.9rem; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      perspective: 1000px;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 20px;
+      border: 2px solid var(--teal);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transform-style: preserve-3d;
+    }
+
+    .card:hover { box-shadow: 0 20px 35px rgba(0,71,101,.25); }
+
+    .btn {
+      display: inline-block;
+      background: var(--teal);
+      color: var(--white);
+      padding: 0.8rem 1.4rem;
+      border-radius: 12px;
+      text-decoration: none;
+      margin-top: 1rem;
+      font-family: 'Archive', sans-serif;
+      transition: transform .15s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .btn:hover { transform: scale(1.05); }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--teal);
+      text-decoration: none;
+      font-family: 'Archive', sans-serif;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover { color: var(--navy-2); }
+
+    /* Stacked icon (black under, white on top) */
+    .icon-stack {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      width: 140px;
+      z-index: 10000;
+      pointer-events: auto;
+    }
+
+    .icon-stack img { display: block; width: 100%; height: auto; }
+    .icon-stack .icon-black { position: relative; z-index: 1; }
+    .icon-stack .icon-white {
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 2;
+      clip-path: inset(100% 0 0 0);
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .icon-stack { width: 88px; }
+    }
+
+    footer { background: var(--black); color: var(--white); text-align: center; padding: 1.5rem; margin-top: 3rem; font-size: 0.9rem; }
+
+    @media (max-width: 600px) { header h1 { font-size: 2.2rem; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" style="display: block; text-decoration: none;">
+      <img src="DHHS SCITEXTLOGOWHITE.png" alt="DHHS SCI" class="text-logo">
+    </a>
+    <p>DHHS Science Club • Explore • Experiment • Discover</p>
+  </header>
+
+  <a href="index.html" style="display: block; text-decoration: none;" title="Home">
+    <div class="icon-stack" aria-hidden="false">
+      <img src="DHHSSCI-ICONLOGO.png" alt="DHHS SCI icon (black)" class="icon-black">
+      <img src="DHHS SCIWHITEICONLOGO.png" alt="DHHS SCI icon (white)" class="icon-white">
+    </div>
+  </a>
+
+  <section>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    <h2>About Us</h2>
+    <p> We learn by doing!
+    </p> Et Cetera
+    <p> Et Cetera.</p>
+  </section>
+  <section>
+    <h2>Meet The Board</h2>
+    <div class="cards">
+      <div class="card" onmousemove="rotateCard(event)" onmouseleave="resetCard(this)">
+        <h3>Caleb Kalfin</h3>
+        <p>President and Founder</p>
+      </div>
+      <div class="card" onmousemove="rotateCard(event)" onmouseleave="resetCard(this)">
+        <h3>T B D</h3>
+        <p>Vice President</p>
+      </div>
+      <div class="card" onmousemove="rotateCard(event)" onmouseleave="resetCard(this)">
+        <h3>Yejin Lee</h3>
+        <p>Activities Officer</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 DHHS Science Club • DHHS SCI</footer>
+
+  <script>
+    function rotateCard(e) {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * 10;
+      const rotateY = ((x - centerX) / centerX) * 10;
+      card.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+    }
+
+    function resetCard(card) { card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)'; }
+  </script>
+
+  <script>
+  // Dynamic white-logo reveal based on overlap with dark sections
+  (function(){
+    const stack = document.querySelector('.icon-stack');
+    const white = document.querySelector('.icon-white');
+    const black = document.querySelector('.icon-black');
+    if (!stack || !white || !black) return;
+
+    const targets = Array.from(document.querySelectorAll('header, section, footer'));
+
+    function luminanceFromRGBString(rgb){
+      if (!rgb) return 1;
+      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return 1;
+      const r = m[1]/255, g = m[2]/255, b = m[3]/255;
+      const srgb = [r,g,b].map(c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4));
+      return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+    }
+
+    function isDarkElement(el){
+      const color = getComputedStyle(el).color;
+      const lum = luminanceFromRGBString(color);
+      return lum > 0.7;
+    }
+
+    function updateStackSize(){
+      const rect = black.getBoundingClientRect();
+      stack.style.height = rect.height + 'px';
+    }
+
+    function updateClip(){
+      const logoRect = stack.getBoundingClientRect();
+      let best = {area:0, rect:null};
+      targets.forEach(t => {
+        if (!isDarkElement(t)) return;
+        const r = t.getBoundingClientRect();
+        const ix = Math.max(logoRect.left, r.left);
+        const iy = Math.max(logoRect.top, r.top);
+        const ix2 = Math.min(logoRect.right, r.right);
+        const iy2 = Math.min(logoRect.bottom, r.bottom);
+        if (ix2 <= ix || iy2 <= iy) return;
+        const area = (ix2-ix)*(iy2-iy);
+        if (area > best.area) best = {area, rect:{x:ix,y:iy,x2:ix2,y2:iy2}};
+      });
+
+      if (!best.rect){
+        white.style.clipPath = 'inset(100% 0 0 0)';
+        return;
+      }
+
+      const r = best.rect;
+      const topPct = Math.max(0, (r.y - logoRect.top) / logoRect.height) * 100;
+      const leftPct = Math.max(0, (r.x - logoRect.left) / logoRect.width) * 100;
+      const bottomPct = Math.max(0, (logoRect.bottom - r.y2) / logoRect.height) * 100;
+      const rightPct = Math.max(0, (logoRect.right - r.x2) / logoRect.width) * 100;
+      white.style.clipPath = `inset(${topPct}% ${rightPct}% ${bottomPct}% ${leftPct}%)`;
+    }
+
+    let rafId = null;
+    function onScrollResize(){
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(()=>{
+        updateStackSize();
+        updateClip();
+      });
+    }
+
+    if (black.complete) updateStackSize(); else black.onload = updateStackSize;
+    if (white.complete) updateStackSize(); else white.onload = updateStackSize;
+
+    window.addEventListener('scroll', onScrollResize, {passive:true});
+    window.addEventListener('resize', onScrollResize);
+    setInterval(updateClip, 300);
+    onScrollResize();
+  })();
+  </script>
+
+</body>
+</html>
