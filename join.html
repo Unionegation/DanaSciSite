@@ -67,20 +67,18 @@
   <footer>© 2026 DHHS Science Club • DHHS SCI</footer>
 
   <script>
-  // Dynamic white-logo reveal (same implementation as other pages)
+  // Dynamic white-logo reveal based on overlap with header
   (function(){
     const stack = document.querySelector('.icon-stack');
     const white = document.querySelector('.icon-white');
     const black = document.querySelector('.icon-black');
     if (!stack || !white || !black) return;
-    const targets = Array.from(document.querySelectorAll('header, section, footer'));
-    function luminanceFromRGBString(rgb){ if(!rgb) return 1; const m=rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/); if(!m) return 1; const r=m[1]/255,g=m[2]/255,b=m[3]/255; const srgb=[r,g,b].map(c=>c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)); return 0.2126*srgb[0]+0.7152*srgb[1]+0.0722*srgb[2]; }
-    function isDarkElement(el){ const color=getComputedStyle(el).color; const lum=luminanceFromRGBString(color); return lum>0.7; }
-    function updateStackSize(){ const rect=black.getBoundingClientRect(); stack.style.height=rect.height+'px' }
-    function updateClip(){ const logoRect=stack.getBoundingClientRect(); let best={area:0,rect:null}; targets.forEach(t=>{ if(!isDarkElement(t)) return; const r=t.getBoundingClientRect(); const ix=Math.max(logoRect.left,r.left); const iy=Math.max(logoRect.top,r.top); const ix2=Math.min(logoRect.right,r.right); const iy2=Math.min(logoRect.bottom,r.bottom); if(ix2<=ix||iy2<=iy) return; const area=(ix2-ix)*(iy2-iy); if(area>best.area) best={area,rect:{x:ix,y:iy,x2:ix2,y2:iy2}} }); if(!best.rect){ white.style.clipPath='inset(100% 0 0 0)'; return } const r=best.rect; const topPct=Math.max(0,(r.y-logoRect.top)/logoRect.height)*100; const leftPct=Math.max(0,(r.x-logoRect.left)/logoRect.width)*100; const bottomPct=Math.max(0,(logoRect.bottom-r.y2)/logoRect.height)*100; const rightPct=Math.max(0,(logoRect.right-r.x2)/logoRect.width)*100; white.style.clipPath=`inset(${topPct}% ${rightPct}% ${bottomPct}% ${leftPct}%)` }
-    let rafId=null; function onScrollResize(){ if(rafId) cancelAnimationFrame(rafId); rafId=requestAnimationFrame(()=>{ updateStackSize(); updateClip(); }) }
+    const header = document.querySelector('header');
+    function updateStackSize(){ const rect=black.getBoundingClientRect(); stack.style.height=rect.height+'px'; }
+    function updateClip(){ const logoRect=stack.getBoundingClientRect(); const headerRect=header.getBoundingClientRect(); const ix=Math.max(logoRect.left,headerRect.left); const iy=Math.max(logoRect.top,headerRect.top); const ix2=Math.min(logoRect.right,headerRect.right); const iy2=Math.min(logoRect.bottom,headerRect.bottom); if(ix2<=ix||iy2<=iy){ white.style.clipPath='inset(100% 0 0 0)'; return; } const topPct=Math.max(0,(iy-logoRect.top)/logoRect.height)*100; const leftPct=Math.max(0,(ix-logoRect.left)/logoRect.width)*100; const bottomPct=Math.max(0,(logoRect.bottom-iy2)/logoRect.height)*100; const rightPct=Math.max(0,(logoRect.right-ix2)/logoRect.width)*100; white.style.clipPath=`inset(${topPct}% ${rightPct}% ${bottomPct}% ${leftPct}%)`; }
+    let rafId=null; let lastUpdate=0; function onScrollResize(){const now=Date.now();if(now-lastUpdate<16)return;lastUpdate=now;if(rafId)cancelAnimationFrame(rafId);rafId=requestAnimationFrame(()=>{updateStackSize();updateClip();});}
     if(black.complete) updateStackSize(); else black.onload=updateStackSize; if(white.complete) updateStackSize(); else white.onload=updateStackSize;
-    window.addEventListener('scroll', onScrollResize, {passive:true}); window.addEventListener('resize', onScrollResize); setInterval(updateClip,300); onScrollResize();
+    window.addEventListener('scroll', onScrollResize, {passive:true}); window.addEventListener('resize', onScrollResize); setInterval(updateClip,1000); onScrollResize();
   })();
   </script>
 

@@ -86,6 +86,7 @@
       border: 2px solid var(--teal);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       transform-style: preserve-3d;
+      will-change: transform;
     }
 
     .card:hover { box-shadow: 0 20px 35px rgba(0,71,101,.25); }
@@ -191,45 +192,20 @@
   <footer>© 2026 DHHS Science Club • DHHS SCI</footer>
 
   <script>
-    function rotateCard(e) {
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * 10;
-      const rotateY = ((x - centerX) / centerX) * 10;
-      card.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    }
-
-    function resetCard(card) { card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)'; }
+    let lastCardUpdate=0;
+    function rotateCard(e){const now=Date.now();if(now-lastCardUpdate<16)return;lastCardUpdate=now;const card=e.currentTarget,rect=card.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,cx=rect.width/2,cy=rect.height/2,rx=((y-cy)/cy)*10,ry=((x-cx)/cx)*10;card.style.transform=`rotateX(${-rx}deg) rotateY(${ry}deg) scale(1.05)`;}
+    function resetCard(card){card.style.transform='rotateX(0deg) rotateY(0deg) scale(1)';}
   </script>
 
   <script>
-  // Dynamic white-logo reveal based on overlap with dark sections
+  // Dynamic white-logo reveal based on overlap with header
   (function(){
     const stack = document.querySelector('.icon-stack');
     const white = document.querySelector('.icon-white');
     const black = document.querySelector('.icon-black');
     if (!stack || !white || !black) return;
 
-    const targets = Array.from(document.querySelectorAll('header, section, footer'));
-
-    function luminanceFromRGBString(rgb){
-      if (!rgb) return 1;
-      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!m) return 1;
-      const r = m[1]/255, g = m[2]/255, b = m[3]/255;
-      const srgb = [r,g,b].map(c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4));
-      return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-    }
-
-    function isDarkElement(el){
-      const color = getComputedStyle(el).color;
-      const lum = luminanceFromRGBString(color);
-      return lum > 0.7;
-    }
+    const header = document.querySelector('header');
 
     function updateStackSize(){
       const rect = black.getBoundingClientRect();
@@ -238,34 +214,28 @@
 
     function updateClip(){
       const logoRect = stack.getBoundingClientRect();
-      let best = {area:0, rect:null};
-      targets.forEach(t => {
-        if (!isDarkElement(t)) return;
-        const r = t.getBoundingClientRect();
-        const ix = Math.max(logoRect.left, r.left);
-        const iy = Math.max(logoRect.top, r.top);
-        const ix2 = Math.min(logoRect.right, r.right);
-        const iy2 = Math.min(logoRect.bottom, r.bottom);
-        if (ix2 <= ix || iy2 <= iy) return;
-        const area = (ix2-ix)*(iy2-iy);
-        if (area > best.area) best = {area, rect:{x:ix,y:iy,x2:ix2,y2:iy2}};
-      });
-
-      if (!best.rect){
+      const headerRect = header.getBoundingClientRect();
+      const ix = Math.max(logoRect.left, headerRect.left);
+      const iy = Math.max(logoRect.top, headerRect.top);
+      const ix2 = Math.min(logoRect.right, headerRect.right);
+      const iy2 = Math.min(logoRect.bottom, headerRect.bottom);
+      if (ix2 <= ix || iy2 <= iy) {
         white.style.clipPath = 'inset(100% 0 0 0)';
         return;
       }
-
-      const r = best.rect;
-      const topPct = Math.max(0, (r.y - logoRect.top) / logoRect.height) * 100;
-      const leftPct = Math.max(0, (r.x - logoRect.left) / logoRect.width) * 100;
-      const bottomPct = Math.max(0, (logoRect.bottom - r.y2) / logoRect.height) * 100;
-      const rightPct = Math.max(0, (logoRect.right - r.x2) / logoRect.width) * 100;
+      const topPct = Math.max(0, (iy - logoRect.top) / logoRect.height) * 100;
+      const leftPct = Math.max(0, (ix - logoRect.left) / logoRect.width) * 100;
+      const bottomPct = Math.max(0, (logoRect.bottom - iy2) / logoRect.height) * 100;
+      const rightPct = Math.max(0, (logoRect.right - ix2) / logoRect.width) * 100;
       white.style.clipPath = `inset(${topPct}% ${rightPct}% ${bottomPct}% ${leftPct}%)`;
     }
 
     let rafId = null;
+    let lastUpdate = 0;
     function onScrollResize(){
+      const now = Date.now();
+      if (now - lastUpdate < 16) return; // Throttle to ~60 FPS
+      lastUpdate = now;
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(()=>{
         updateStackSize();
@@ -278,7 +248,7 @@
 
     window.addEventListener('scroll', onScrollResize, {passive:true});
     window.addEventListener('resize', onScrollResize);
-    setInterval(updateClip, 300);
+    setInterval(updateClip, 1000);
     onScrollResize();
   })();
   </script>

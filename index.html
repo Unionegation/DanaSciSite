@@ -101,6 +101,7 @@
       border: 2px solid var(--teal);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       transform-style: preserve-3d;
+      will-change: transform;
     }
 
     .card:hover { box-shadow: 0 20px 35px rgba(0,71,101,.25); }
@@ -160,6 +161,7 @@
       font-size: 0.8rem;
       pointer-events: auto;
       transition: transform .25s ease;
+      will-change: transform;
     }
 
     .orbit-link:focus, .orbit-link:hover {
@@ -283,93 +285,51 @@
   <footer>© 2026 DHHS Science Club • DHHS SCI</footer>
 
   <script>
-    function rotateCard(e) {
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * 10;
-      const rotateY = ((x - centerX) / centerX) * 10;
-      card.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    }
-
-    function resetCard(card) { card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)'; }
-
-    // Navigate to aboutus.html when About Us section is clicked
-    document.addEventListener('DOMContentLoaded', () => {
-      const aboutSection = document.getElementById('about');
-      if (aboutSection) {
-        aboutSection.addEventListener('click', () => {
-          window.location.href = 'aboutus.html';
-        });
-      }
-    });
+    let lastCardUpdate=0;
+    function rotateCard(e){const now=Date.now();if(now-lastCardUpdate<16)return;lastCardUpdate=now;const card=e.currentTarget,rect=card.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,cx=rect.width/2,cy=rect.height/2,rx=((y-cy)/cy)*10,ry=((x-cx)/cx)*10;card.style.transform=`rotateX(${-rx}deg) rotateY(${ry}deg) scale(1.05)`;}
+    function resetCard(card){card.style.transform='rotateX(0deg) rotateY(0deg) scale(1)';}
+    document.addEventListener('DOMContentLoaded',()=>{const aboutSection=document.getElementById('about');if(aboutSection)aboutSection.addEventListener('click',()=>window.location.href='aboutus.html');});
   </script>
 
   <script>
-  // Dynamic white-logo reveal based on overlap with dark sections
+  // Dynamic white-logo reveal based on overlap with header
   (function(){
     const stack = document.querySelector('.icon-stack');
     const white = document.querySelector('.icon-white');
     const black = document.querySelector('.icon-black');
     if (!stack || !white || !black) return;
 
-    const targets = Array.from(document.querySelectorAll('header, section, footer'));
-
-    function luminanceFromRGBString(rgb){
-      if (!rgb) return 1;
-      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!m) return 1;
-      const r = m[1]/255, g = m[2]/255, b = m[3]/255;
-      const srgb = [r,g,b].map(c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4));
-      return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-    }
-
-    function isDarkElement(el){
-      const color = getComputedStyle(el).color; // text color: white on dark backgrounds
-      const lum = luminanceFromRGBString(color);
-      return lum > 0.7; // white text -> dark background
-    }
+    const header = document.querySelector('header');
 
     function updateStackSize(){
-      // ensure stack has explicit height to allow absolute positioning
       const rect = black.getBoundingClientRect();
       stack.style.height = rect.height + 'px';
     }
 
     function updateClip(){
       const logoRect = stack.getBoundingClientRect();
-      let best = {area:0, rect:null};
-      targets.forEach(t => {
-        if (!isDarkElement(t)) return; // only consider dark sections
-        const r = t.getBoundingClientRect();
-        const ix = Math.max(logoRect.left, r.left);
-        const iy = Math.max(logoRect.top, r.top);
-        const ix2 = Math.min(logoRect.right, r.right);
-        const iy2 = Math.min(logoRect.bottom, r.bottom);
-        if (ix2 <= ix || iy2 <= iy) return;
-        const area = (ix2-ix)*(iy2-iy);
-        if (area > best.area) best = {area, rect:{x:ix,y:iy,x2:ix2,y2:iy2}};
-      });
-
-      if (!best.rect){
-        // hide white logo
+      const headerRect = header.getBoundingClientRect();
+      const ix = Math.max(logoRect.left, headerRect.left);
+      const iy = Math.max(logoRect.top, headerRect.top);
+      const ix2 = Math.min(logoRect.right, headerRect.right);
+      const iy2 = Math.min(logoRect.bottom, headerRect.bottom);
+      if (ix2 <= ix || iy2 <= iy) {
         white.style.clipPath = 'inset(100% 0 0 0)';
         return;
       }
-
-      const r = best.rect;
-      const topPct = Math.max(0, (r.y - logoRect.top) / logoRect.height) * 100;
-      const leftPct = Math.max(0, (r.x - logoRect.left) / logoRect.width) * 100;
-      const bottomPct = Math.max(0, (logoRect.bottom - r.y2) / logoRect.height) * 100;
-      const rightPct = Math.max(0, (logoRect.right - r.x2) / logoRect.width) * 100;
+      const topPct = Math.max(0, (iy - logoRect.top) / logoRect.height) * 100;
+      const leftPct = Math.max(0, (ix - logoRect.left) / logoRect.width) * 100;
+      const bottomPct = Math.max(0, (logoRect.bottom - iy2) / logoRect.height) * 100;
+      const rightPct = Math.max(0, (logoRect.right - ix2) / logoRect.width) * 100;
       white.style.clipPath = `inset(${topPct}% ${rightPct}% ${bottomPct}% ${leftPct}%)`;
     }
 
     let rafId = null;
+    let lastUpdate = 0;
     function onScrollResize(){
+      const now = Date.now();
+      if (now - lastUpdate < 16) return;
+      lastUpdate = now;
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(()=>{
         updateStackSize();
@@ -377,163 +337,29 @@
       });
     }
 
-    // initialize
     if (black.complete) updateStackSize(); else black.onload = updateStackSize;
     if (white.complete) updateStackSize(); else white.onload = updateStackSize;
 
     window.addEventListener('scroll', onScrollResize, {passive:true});
     window.addEventListener('resize', onScrollResize);
-    // also update periodically in case of layout changes
-    setInterval(updateClip, 300);
-    // initial
+    setInterval(updateClip, 1000);
     onScrollResize();
   })();
   </script>
 
   <script>
   (function(){
-    // Point capture and path interpolation for orbiting links
-    const logo = document.querySelector('.text-logo');
     const links = Array.from(document.querySelectorAll('.orbit-link'));
-    let points = [
-      {
-        "x": -11,
-        "y": -157
-      },
-      {
-        "x": -325,
-        "y": -92
-      },
-      {
-        "x": -250,
-        "y": 116
-      },
-      {
-        "x": -14,
-        "y": 192
-      },
-      {
-        "x": 341,
-        "y": 62
-      },
-      {
-        "x": 306,
-        "y": -123
-      }
-    ];
-
-    let mode = 'spline'; // 'spline' | 'polynomial' | 'circle'
-    const speed = 0.00006; // adjust: larger = faster
-
-    function catmullRom(p0,p1,p2,p3,t){
-      const t2 = t*t, t3 = t2*t;
-      return {
-        x: 0.5 * ((2*p1.x) + (-p0.x + p2.x)*t + (2*p0.x - 5*p1.x + 4*p2.x - p3.x)*t2 + (-p0.x + 3*p1.x - 3*p2.x + p3.x)*t3),
-        y: 0.5 * ((2*p1.y) + (-p0.y + p2.y)*t + (2*p0.y - 5*p1.y + 4*p2.y - p3.y)*t2 + (-p0.y + 3*p1.y - 3*p2.y + p3.y)*t3)
-      };
-    }
-
-    function pointOnClosedSpline(u){
-      const n = points.length;
-      if (n < 2) return {x:0,y:0};
-      const total = n;
-      const seg = Math.floor(u * total) % n;
-      const t = (u * total) - Math.floor(u * total);
-      const i0 = (seg - 1 + n) % n;
-      const i1 = seg % n;
-      const i2 = (seg + 1) % n;
-      const i3 = (seg + 2) % n;
-      return catmullRom(points[i0], points[i1], points[i2], points[i3], t);
-    }
-
-    // Lagrange interpolation (parametric) for polynomial through points
-    function lagrangePoint(t){
-      const n = points.length;
-      if (n === 0) return {x:0,y:0};
-      if (n === 1) return {x: points[0].x, y: points[0].y};
-      // parameterize t_i = i/(n-1)
-      let x = 0, y = 0;
-      for (let i=0;i<n;i++){
-        let Li = 1;
-        const ti = i / (n-1);
-        for (let j=0;j<n;j++) if (j!==i){
-          const tj = j / (n-1);
-          Li *= (t - tj) / (ti - tj);
-        }
-        x += points[i].x * Li;
-        y += points[i].y * Li;
-      }
-      return {x,y};
-    }
-
-    // utility: get point on chosen path for normalized u in [0,1)
-    function pointOnPath(u){
-      if (points.length < 2) {
-        // fallback: small circle
-        const a = u * Math.PI * 2;
-        return { x: Math.cos(a) * 160, y: Math.sin(a) * 120 };
-      }
-      if (mode === 'spline') return pointOnClosedSpline(u);
-      if (mode === 'polynomial') {
-        // use t in [0,1]
-        const t = u % 1;
-        return lagrangePoint(t);
-      }
-      // circle
-      const a = u * Math.PI * 2;
-      return { x: Math.cos(a) * 200, y: Math.sin(a) * 150 };
-    }
-
-    // disable any CSS animations on links
-    links.forEach(l => l.style.animation = 'none');
-
-    // Animate orbiting links along path, keep them flat (only translate)
-    links.forEach((link, i) => {
-      const phase = i / links.length;
-      function frame(now){
-        const u = (now * speed + phase) % 1;
-        const p = pointOnPath(u);
-        link.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
-        requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    });
-
-    /*
-    // Point capture relative to logo center: click to record
-    function recordPoint(clientX, clientY){
-      if (!logo) return;
-      const rect = logo.getBoundingClientRect();
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top + rect.height/2;
-      const px = Math.round(clientX - cx);
-      const py = Math.round(clientY - cy);
-      points.push({x: px, y: py});
-      console.log('recorded point', {x:px,y:py}, 'points.length=', points.length);
-    }
-
-    document.addEventListener('click', (e) => {
-      // ignore clicks on orbit links so navigation still works
-      if (e.target.closest('.orbit-link')) return;
-      recordPoint(e.clientX, e.clientY);
-    });
-
-    // keyboard controls: P print, C clear, M cycle mode
-    document.addEventListener('keydown', (e) => {
-      const key = e.key.toLowerCase();
-      if (key === 'p') {
-        console.log('points array:', JSON.stringify(points, null, 2));
-      } else if (key === 'c'){
-        points = [];
-        console.log('points cleared');
-      } else if (key === 'm'){
-        mode = (mode === 'spline') ? 'polynomial' : (mode === 'polynomial' ? 'circle' : 'spline');
-        console.log('mode ->', mode);
-      }
-    });
-
-    console.log('Point capture active: click to record points relative to the text-logo. Press P to print, C to clear, M to cycle interpolation modes (spline → polynomial → circle).');
-    */
+    let points = [{"x":-11,"y":-157},{"x":-325,"y":-92},{"x":-250,"y":116},{"x":-14,"y":192},{"x":341,"y":62},{"x":306,"y":-123}];
+    let mode = 'spline';
+    const speed = 0.00006;
+    function catmullRom(p0,p1,p2,p3,t){const t2=t*t,t3=t2*t;return{x:0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),y:0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)};}
+    function pointOnClosedSpline(u){const n=points.length;if(n<2)return{x:0,y:0};const total=n,seg=Math.floor(u*total)%n,t=(u*total)-Math.floor(u*total),i0=(seg-1+n)%n,i1=seg%n,i2=(seg+1)%n,i3=(seg+2)%n;return catmullRom(points[i0],points[i1],points[i2],points[i3],t);}
+    let pathPoints=[],numPoints=360;for(let i=0;i<numPoints;i++){const u=i/numPoints;pathPoints.push(pointOnClosedSpline(u));}
+    function pointOnPath(u){if(points.length<2){const a=u*2*Math.PI;return{x:Math.cos(a)*160,y:Math.sin(a)*120};}if(mode==='spline'){const idx=Math.floor(u*numPoints)%numPoints;return pathPoints[idx];}if(mode==='polynomial'){let x=0,y=0;for(let i=0;i<points.length;i++){let Li=1;const ti=i/(points.length-1);for(let j=0;j<points.length;j++)if(j!==i){const tj=j/(points.length-1);Li*=(u-tj)/(ti-tj);}x+=points[i].x*Li;y+=points[i].y*Li;}return{x,y};}const a=u*2*Math.PI;return{x:Math.cos(a)*200,y:Math.sin(a)*150};}
+    links.forEach(l=>l.style.animation='none');
+    function animateLinks(now){links.forEach((link,i)=>{const ph=i/links.length,u=(now*speed+ph)%1,pos=pointOnPath(u);link.style.transform=`translate(${pos.x}px,${pos.y}px) translate(-50%,-50%)`;});requestAnimationFrame(animateLinks);}
+    requestAnimationFrame(animateLinks);
   })();
   </script>
 
